@@ -7,6 +7,7 @@ Header translation for Microsoft XmlLite
 * XmlLite.dll is required.  It is included with all new versions of Windows, and service packs for old versions.
 * XmlReader's pull-based interface is cleaner to use than SAX's event-based interface.
 * More info: http://msdn.microsoft.com/en-us/library/ms752838%28v=VS.85%29.aspx
+* StackOverflow discussion: http://stackoverflow.com/a/6969959/243144
                                                                                         
 **Note**: This is a minimal translation, some parts were not implemented and most are untested.
 
