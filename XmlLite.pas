@@ -6,7 +6,7 @@
   * XmlLite.dll is required.  It is included with all new versions of Windows, and service packs for old versions.
   * XmlReader's pull-based interface is cleaner to use than SAX's event-based interface.
   * More info: http://msdn.microsoft.com/en-us/library/ms752838%28v=VS.85%29.aspx
-                                                                                            
+
   Note: This is a minimal translation, some parts were not implemented and most are untested.
 -----------------------------------------------------------------------------}
 unit XmlLite;
@@ -31,6 +31,9 @@ const
   XmlStandalone_Omit  = 0;
   XmlStandalone_Yes  = 1;
   XmlStandalone_No  = 2;
+
+  XmlDtdProcessing_Prohibit = 0;
+  XmlDtdProcessing_Parse = 1;
 
   XmlWriterProperty_MultiLanguage = 0;
   XmlWriterProperty_Indent = 1;
@@ -114,6 +117,8 @@ function CreateXmlFileWriter(const FileName: string = ''): IXMLWriter;
 function OpenXmlFileStreamReader(const FileName: string): IStream;
 function OpenXmlFileStreamWriter(const FileName: string): IStream;
 
+procedure CheckHR(HR: HRESULT);
+
 implementation
 
 uses Classes, SysUtils;
@@ -127,16 +132,19 @@ function CreateXmlWriter(const refiid: TGUID; out _IXMLWriter: IXMLWriter; const
 
 function CreateXmlFileReader(const FileName: string): IXMLReader;
 begin
-  CreateXmlReader(XMLReaderGuid, Result, nil);
+  CheckHR(CreateXmlReader(XMLReaderGuid, Result, nil));
   if (Result <> nil) and (FileName <> '') then
-    Result.SetInput(OpenXmlFileStreamReader(FileName));
+  begin
+    CheckHR(Result.SetProperty(XmlReaderProperty_DtdProcessing, XmlDtdProcessing_Parse));
+    CheckHR(Result.SetInput(OpenXmlFileStreamReader(FileName)));
+  end;
 end;
 
 function CreateXmlFileWriter(const FileName: string): IXMLWriter;
 begin
-  CreateXmlWriter(XMLWriterGuid, Result, nil);
+  CheckHR(CreateXmlWriter(XMLWriterGuid, Result, nil));
   if (Result <> nil) and (FileName <> '') then
-    Result.SetOutput(OpenXmlFileStreamWriter(FileName));  
+    CheckHR(Result.SetOutput(OpenXmlFileStreamWriter(FileName)));
 end;
 
 function OpenXmlFileStreamReader(const FileName: string): IStream;
@@ -150,4 +158,9 @@ begin
   Result := TStreamAdapter.Create(TFileStream.Create(FileName, fmCreate), soOwned);
 end;
 
+procedure CheckHR(hr: HRESULT);
+begin
+  if (hr < 0) then
+    raise Exception.CreateFmt('XmlLite exception! Code: %d', [hr]);
+end;
 end.
