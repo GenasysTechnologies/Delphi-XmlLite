@@ -150,7 +150,7 @@ end;
 function OpenXmlFileStreamReader(const FileName: string): IStream;
 begin
   Assert(FileExists(FileName), 'XML file should exist');
-  Result := TStreamAdapter.Create(TFileStream.Create(FileName, fmOpenRead), soOwned);
+  Result := TStreamAdapter.Create(TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite), soOwned);
 end;
 
 function OpenXmlFileStreamWriter(const FileName: string): IStream;
